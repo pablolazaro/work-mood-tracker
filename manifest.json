@@ -1,0 +1,15 @@
+{
+  "name": "Work Mood Tracker",
+  "short_name": "MoodTracker",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F0E8",
+  "theme_color": "#C97B3F",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
