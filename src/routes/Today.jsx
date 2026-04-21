@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { format, getISOWeek } from 'date-fns'
+import { format, getISOWeek, addWeeks, subWeeks } from 'date-fns'
 import { useMoodContext } from '../context/MoodContext'
 import { useMoodData } from '../hooks/useMoodData'
 import MoodButton from '../components/MoodButton'
-import { formatISODate, getWeekDays } from '../utils/dateHelpers'
+import { formatISODate, getWeekDays, getWeekLabel } from '../utils/dateHelpers'
 
 const MAX_NOTE = 280
 
@@ -18,6 +18,7 @@ export default function Today() {
   const { getEntry, canLog, isEditable, isWorkableDay } = useMoodData()
   const { state } = useMoodContext()
 
+  const [weekStart, setWeekStart] = useState(() => getWeekDays(new Date())[0])
   const [selectedDate, setSelectedDate] = useState(() => formatISODate(new Date()))
   const [selectedMood, setSelectedMood] = useState(null)
   const [noteText, setNoteText] = useState('')
@@ -26,7 +27,13 @@ export default function Today() {
   const [reminderTime, setReminderTime] = useState(state.reminder.time)
 
   const todayISO = formatISODate(new Date())
-  const weekDays = getWeekDays(new Date())
+  const todayDate = new Date()
+  const weekNum = getISOWeek(todayDate)
+
+  const currentWeekStart = getWeekDays(new Date())[0]
+  const isCurrentWeek = formatISODate(weekStart) === formatISODate(currentWeekStart)
+
+  const weekDays = getWeekDays(weekStart)
   const workdayStrip = weekDays.slice(0, 5)
 
   useEffect(() => {
@@ -45,8 +52,19 @@ export default function Today() {
   })()
   const isBlockedWeekend = isWeekend && !isWorkableDay(selectedDate)
 
-  const todayDate = new Date()
-  const weekNum = getISOWeek(todayDate)
+  function goBack() {
+    const newStart = subWeeks(weekStart, 1)
+    setWeekStart(newStart)
+    setSelectedDate(formatISODate(newStart))
+  }
+
+  function goForward() {
+    if (isCurrentWeek) return
+    const newStart = addWeeks(weekStart, 1)
+    const newIsCurrentWeek = formatISODate(newStart) === formatISODate(currentWeekStart)
+    setWeekStart(newStart)
+    setSelectedDate(newIsCurrentWeek ? todayISO : formatISODate(newStart))
+  }
 
   function handleSave() {
     if (!selectedMood || !canLogSelected || !canEditSelected) return
@@ -86,24 +104,38 @@ export default function Today() {
 
   const loggedCount = workdayStrip.filter(d => state.entries[formatISODate(d)]).length
 
+  const headerTitle = isCurrentWeek ? 'Today' : getWeekLabel(weekStart).replace(/, \d{4}$/, '')
+  const headerSub = isCurrentWeek
+    ? `${format(todayDate, 'EEE, MMM d')} · Week ${weekNum}`
+    : `${format(weekStart, 'MMM d')} – ${format(workdayStrip[4], 'MMM d, yyyy')}`
+
   return (
     <div className="max-w-sm mx-auto px-4 pt-5 pb-4">
       {/* Header */}
       <div className="flex items-start justify-between px-1.5 pb-5">
         <div>
-          <h1 className="font-serif text-[32px] font-medium leading-none tracking-[-0.025em] text-ink">Today</h1>
-          <p className="font-sans text-[13px] text-muted mt-1 tracking-[0.01em]">
-            {format(todayDate, 'EEE, MMM d')} · Week {weekNum}
-          </p>
+          <h1 className="font-serif text-[32px] font-medium leading-none tracking-[-0.025em] text-ink">{headerTitle}</h1>
+          <p className="font-sans text-[13px] text-muted mt-1 tracking-[0.01em]">{headerSub}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowSettings(s => !s)}
-          className="w-9 h-9 rounded-full flex items-center justify-center text-[13px] text-muted bg-paper-2 hover:text-ink transition-colors"
-          aria-label="Settings"
-        >
-          ⚙
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={goBack}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-[18px] text-ink bg-paper-2 hover:bg-hair transition-colors"
+          >‹</button>
+          <button
+            type="button"
+            onClick={goForward}
+            disabled={isCurrentWeek}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-[18px] text-ink bg-paper-2 hover:bg-hair transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >›</button>
+          <button
+            type="button"
+            onClick={() => setShowSettings(s => !s)}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-[13px] text-muted bg-paper-2 hover:text-ink transition-colors"
+            aria-label="Settings"
+          >⚙</button>
+        </div>
       </div>
 
       {/* Settings panel */}
@@ -138,7 +170,10 @@ export default function Today() {
 
       {/* Greeting */}
       <p className="font-serif font-normal text-[28px] leading-[1.2] tracking-[-0.02em] text-ink px-1 pb-1">
-        How did work go <em className="italic" style={{ color: '#b05a35' }}>today</em>?
+        {isCurrentWeek
+          ? <>How did work go <em className="italic" style={{ color: '#b05a35' }}>today</em>?</>
+          : <>How did work go on <em className="italic" style={{ color: '#b05a35' }}>{format(new Date(selectedDate + 'T00:00:00'), 'EEEE')}</em>?</>
+        }
       </p>
       <p className="font-sans text-[13px] text-muted uppercase tracking-[0.04em] px-1 pb-6">
         Tap one · you can change it later
@@ -221,11 +256,11 @@ export default function Today() {
         </div>
       )}
 
-      {/* This week strip */}
+      {/* Week strip */}
       <div>
         <div className="flex justify-between items-center px-1 mb-2.5">
           <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-            This week
+            {isCurrentWeek ? 'This week' : getWeekLabel(weekStart).replace(/, \d{4}$/, '')}
           </span>
           <span className="font-sans text-[12px] font-medium text-ink-2">
             {loggedCount} of 5 logged
@@ -236,6 +271,7 @@ export default function Today() {
             const iso = formatISODate(day)
             const dayEntry = state.entries[iso]
             const isToday = iso === todayISO
+            const isSelected = iso === selectedDate
             return (
               <button
                 key={iso}
@@ -244,7 +280,11 @@ export default function Today() {
                 className="flex flex-col items-center gap-2 py-2.5 rounded-[14px] transition-colors"
                 style={{
                   background: isToday ? '#ece3d3' : '#fffaf2',
-                  boxShadow: isToday ? '0 0 0 1.5px #2a241c' : '0 0 0 1px #e2d8c5',
+                  boxShadow: isSelected
+                    ? '0 0 0 1.5px #2a241c'
+                    : isToday
+                    ? '0 0 0 1.5px #2a241c'
+                    : '0 0 0 1px #e2d8c5',
                 }}
               >
                 <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
