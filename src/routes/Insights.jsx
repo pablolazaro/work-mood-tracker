@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import {
   ResponsiveContainer,
-  LineChart,
+  ComposedChart,
+  Area,
   Line,
   XAxis,
   Tooltip as RechartsTooltip,
@@ -80,7 +81,7 @@ export default function Insights() {
   const worstDow = dowPoints.reduce((worst, p) => p.pctGood !== null && (worst === null || p.pctGood < worst.pctGood) ? p : worst, null)
 
   return (
-    <div className="max-w-sm mx-auto px-4 pt-5 space-y-0">
+    <div className="max-w-sm mx-auto px-4 pt-5">
       {/* Header */}
       <div className="flex items-start justify-between px-1.5 pb-5">
         <div>
@@ -128,7 +129,7 @@ export default function Insights() {
 
       {/* This month stripe */}
       <div
-        className="rounded-[20px] px-[18px] py-4 mb-3"
+        className="rounded-[20px] px-[18px] py-4 mb-5"
         style={{ background: '#fffaf2', boxShadow: '0 0 0 1px #e2d8c5' }}
       >
         <h4 className="font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-muted mb-3">
@@ -159,14 +160,14 @@ export default function Insights() {
 
       {/* 8-week trend */}
       <div
-        className="rounded-[20px] px-[18px] py-4 mb-3"
+        className="rounded-[20px] px-[18px] py-4 mb-5"
         style={{ background: '#fffaf2', boxShadow: '0 0 0 1px #e2d8c5' }}
       >
         <h4 className="font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-muted mb-3">
           Last 8 weeks · % good
         </h4>
         <ResponsiveContainer width="100%" height={120}>
-          <LineChart data={trendPoints} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
+          <ComposedChart data={trendPoints} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
             <defs>
               <linearGradient id="trendArea" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#3f7d58" stopOpacity={0.15} />
@@ -180,6 +181,15 @@ export default function Insights() {
               axisLine={false}
               tickLine={false}
             />
+            <Area
+              type="monotoneX"
+              dataKey="pctGood"
+              fill="url(#trendArea)"
+              stroke="none"
+              dot={false}
+              activeDot={false}
+              isAnimationActive={false}
+            />
             <RechartsTooltip
               contentStyle={{ fontFamily: 'Inter', fontSize: 12, borderRadius: 8, border: '1px solid #e2d8c5', background: '#fffaf2' }}
               formatter={v => v === null ? '—' : `${v.toFixed(1)}%`}
@@ -192,23 +202,28 @@ export default function Insights() {
               strokeWidth={2.5}
               strokeLinecap="round"
               dot={(props) => {
-                const { cx, cy, index } = props
+                const { cx, cy, index, value } = props
                 const isLast = index === trendPoints.length - 1
+                if (isLast) {
+                  return (
+                    <g key={index}>
+                      <circle cx={cx} cy={cy} r={5} fill="#3f7d58" stroke="#3f7d58" strokeWidth={2} />
+                      {value !== null && (
+                        <text x={cx} y={cy - 12} textAnchor="middle"
+                          style={{ fontFamily: 'Fraunces, serif', fontSize: 11, fill: '#5a4f41', fontWeight: 500 }}>
+                          {`${Math.round(value)}%`}
+                        </text>
+                      )}
+                    </g>
+                  )
+                }
                 return (
-                  <circle
-                    key={index}
-                    cx={cx}
-                    cy={cy}
-                    r={isLast ? 5 : 3.5}
-                    fill={isLast ? '#3f7d58' : '#fffaf2'}
-                    stroke="#3f7d58"
-                    strokeWidth={2}
-                  />
+                  <circle key={index} cx={cx} cy={cy} r={3.5} fill="#fffaf2" stroke="#3f7d58" strokeWidth={2} />
                 )
               }}
               connectNulls={false}
             />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
 
