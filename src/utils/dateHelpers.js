@@ -60,5 +60,5 @@ export function getWeekLabel(date) {
 
 export function getLast8ISOWeeks(today) {
   const thisWeekStart = startOfISOWeek(today)
-  return Array.from({ length: 8 }, (_, i) => subWeeks(thisWeekStart, 8 - i))
+  return Array.from({ length: 8 }, (_, i) => subWeeks(thisWeekStart, 7 - i))
 }
