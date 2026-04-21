@@ -188,7 +188,7 @@ export default function Today() {
           onChange={e => setNoteText(e.target.value.slice(0, MAX_NOTE))}
           disabled={isBlockedWeekend || !canEditSelected}
           placeholder="What made today what it was?"
-          rows={4}
+          rows={3}
           className="w-full border-none bg-transparent outline-none resize-none font-serif font-normal text-[18px] leading-[1.5] tracking-[-0.005em] text-ink placeholder:text-muted placeholder:italic disabled:opacity-40 disabled:cursor-not-allowed"
         />
         <p className="font-sans text-xs text-muted text-right mt-1">
