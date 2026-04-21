@@ -63,7 +63,7 @@ export default function Weekly() {
     dispatch({ type: 'TOGGLE_WORKABLE_DAY', payload: { date: iso } })
   }
 
-  const weekLabel = getWeekLabel(weekStart)
+  const weekLabel = getWeekLabel(weekStart).replace(/, \d{4}$/, '')
   const dateRange = `${format(weekDays[0], 'MMM d')} – ${format(weekDays[6], 'MMM d, yyyy')}`
 
   const totalLogged = weekDays.filter(d => state.entries[formatISODate(d)]?.mood === 'good').length
