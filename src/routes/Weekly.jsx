@@ -66,7 +66,7 @@ export default function Weekly() {
   const weekLabel = getWeekLabel(weekStart)
   const dateRange = `${format(weekDays[0], 'MMM d')} – ${format(weekDays[6], 'MMM d, yyyy')}`
 
-  const totalLogged = weekDays.filter(d => state.entries[formatISODate(d)]).length
+  const totalLogged = weekDays.filter(d => state.entries[formatISODate(d)]?.mood === 'good').length
   const workdayCount = weekDays.filter(d => {
     const dow = getDay(d)
     const isWeekend = dow === 0 || dow === 6
@@ -109,11 +109,7 @@ export default function Weekly() {
         </div>
         <div className="font-sans text-[13px] text-right leading-[1.4]" style={{ color: '#5a4f41' }}>
           <strong className="block font-semibold text-ink">
-            {stats.pctGood === null
-              ? 'No entries yet.'
-              : stats.pctGood >= 60
-              ? 'Good week.'
-              : 'Tough week.'}
+            {stats.pctGood === null ? 'No entries yet.' : `${stats.label}.`}
           </strong>
           {totalLogged} of {workdayCount} workdays<br />went well.
         </div>
