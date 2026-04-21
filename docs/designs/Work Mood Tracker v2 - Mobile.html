@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Work Mood Tracker — Mobile Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;700&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5efe4; --paper-2:#ebe3d3;
+    --ink:#1d1a16; --ink-2:#3a342c; --muted:#8a8272;
+    --good:#c85a33; --bad:#4a6b82; --off:#b8a98a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Kalam',cursive}
+  body{
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(0,0,0,.025) 0, transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(0,0,0,.035) 0, transparent 45%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,.012) 0 1px, transparent 1px 3px);
+    min-height:100vh;
+  }
+
+  /* Page frame */
+  .app{padding:26px 28px 120px; max-width: 1800px; margin: 0 auto;}
+  .topbar{display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; margin-bottom: 22px;}
+  .brand{font-family:'Caveat'; font-size:42px; line-height:1;}
+  .brand small{display:block; font-family:'Kalam'; font-weight:300; font-size:14px; color:var(--muted); margin-top:4px;}
+  .legend{display:flex; gap:14px; align-items:center; font-family:'Kalam'; font-size:13px; color:var(--ink-2); flex-wrap:wrap;}
+  .legend .dot{display:inline-block; width:13px; height:13px; margin-right:6px; border:2px solid var(--ink); vertical-align:-2px;}
+  .legend .dot.good{background:var(--good); border-radius:50%}
+  .legend .dot.bad{background:var(--bad); transform:rotate(45deg) translateY(-1px)}
+  .legend .dot.off{background:repeating-linear-gradient(45deg, var(--off) 0 4px, transparent 4px 8px); border-radius:3px}
+  .legend .dot.empty{background:transparent; border-style:dashed; border-radius:3px}
+
+  /* Flip-book canvas */
+  .canvas{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 36px 28px;
+    padding-top: 8px;
+  }
+  .screen-wrap{
+    display:flex; flex-direction:column; align-items:center; gap: 10px;
+  }
+  .label{
+    font-family:'Caveat'; font-size: 22px; color: var(--ink-2); text-align:center; line-height:1.1;
+  }
+  .label small{display:block; font-family:'Kalam'; font-weight:300; font-size: 13px; color: var(--muted); margin-top: 2px;}
+
+  /* Naked phone screen */
+  .screen{
+    width: 360px; height: 740px;
+    background: var(--paper);
+    border: 2.5px solid var(--ink);
+    border-radius: 34px;
+    padding: 18px 18px 0;
+    position: relative;
+    display: flex; flex-direction: column;
+    box-shadow: 6px 8px 0 rgba(0,0,0,.08);
+    overflow: hidden;
+  }
+  .screen.loose{ transform: rotate(-.3deg);}
+  .screen.loose2{ transform: rotate(.3deg);}
+
+  /* status bar: thin faux bar */
+  .statusbar{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'Kalam'; font-size: 12px; color: var(--muted);
+    margin: -2px 4px 8px;
+  }
+  .statusbar .bars{display:inline-flex; gap:2px;}
+  .statusbar .bars i{display:inline-block; width:3px; background: var(--ink); border-radius:1px;}
+  .statusbar .bars i:nth-child(1){height:5px;}
+  .statusbar .bars i:nth-child(2){height:7px;}
+  .statusbar .bars i:nth-child(3){height:9px;}
+  .statusbar .bars i:nth-child(4){height:11px;}
+
+  /* header row */
+  .sh{
+    display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 10px;
+  }
+  .sh .title{font-family:'Caveat'; font-size:30px; line-height:1;}
+  .sh .sub{font-family:'Kalam'; font-size:12px; color:var(--muted)}
+
+  /* content scroll */
+  .sc{flex:1; overflow-y:auto; overflow-x:hidden; padding-bottom: 80px; margin: 0 -4px; padding-left:4px; padding-right:4px;}
+  .sc::-webkit-scrollbar{width:0}
+
+  /* bottom tab bar */
+  .tabbar{
+    position:absolute; left: 14px; right: 14px; bottom: 14px;
+    border: 2px solid var(--ink); background: var(--paper);
+    border-radius: 22px;
+    display:grid; grid-template-columns: repeat(3, 1fr);
+    height: 58px; align-items:center;
+  }
+  .tabbar .tb{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'Kalam'; font-size: 12px; color: var(--ink-2); text-transform:uppercase; letter-spacing:1px;
+    cursor: default; gap: 3px;
+    border-right: 1.5px dashed var(--ink); height: 100%;
+  }
+  .tabbar .tb:last-child{border-right:none}
+  .tabbar .tb .ic{font-family:'Caveat'; font-size:20px; line-height:1;}
+  .tabbar .tb.on{background: var(--ink); color: var(--paper); border-radius: 20px;}
+  .tabbar .tb.on .ic{color: var(--paper)}
+
+  /* shared UI bits */
+  .card{
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    padding: 12px 14px;
+    background: var(--paper);
+    margin-bottom: 10px;
+  }
+  .card h4{
+    margin: 0 0 8px; font-family:'Kalam'; font-size: 11px; font-weight:400;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted);
+  }
+  .dash{border-top: 1.5px dashed var(--ink); margin: 8px 0; opacity: .4;}
+
+  /* mood marks */
+  .mk{display:inline-block; width: 18px; height: 18px; border: 2px solid var(--ink); vertical-align:-4px;}
+  .mk.good{background:var(--good); border-radius:50%;}
+  .mk.bad{background:var(--bad); transform:rotate(45deg);}
+  .mk.off{background:repeating-linear-gradient(45deg, var(--off) 0 3px, transparent 3px 6px); border-radius: 3px;}
+  .mk.empty{background:transparent; border-style:dashed; border-radius: 3px;}
+
+  /* =========== LOG screen — 3 variations =========== */
+
+  /* A: three stacked buttons + note */
+  .loga .qn{font-family:'Caveat'; font-size: 32px; text-align:center; line-height: 1.1; margin: 8px 0;}
+  .loga .sub{font-family:'Kalam'; font-size: 13px; color: var(--muted); text-align:center; margin-bottom: 14px;}
+  .loga .choices{display:flex; flex-direction:column; gap: 10px; margin: 6px 0 18px;}
+  .loga .choices button{
+    display:flex; align-items:center; gap: 14px;
+    font-family:'Kalam'; font-size: 18px; color: var(--ink); background: var(--paper);
+    border: 2.5px solid var(--ink); padding: 16px 18px;
+    border-radius: 18px; cursor: pointer; text-align:left;
+  }
+  .loga .choices button .mk{width:28px; height:28px;}
+  .loga .choices button.sel.good{background:var(--good); color:var(--paper)}
+  .loga .choices button.sel.bad{background:var(--bad); color:var(--paper)}
+  .loga .choices button.sel.off{background:var(--off); color:var(--ink)}
+  .loga .note{
+    border-top: 1.5px dashed var(--ink); padding-top: 10px; margin-top: 8px;
+  }
+  .loga .note label{font-family:'Kalam'; font-size:11px; color: var(--muted); text-transform:uppercase; letter-spacing:1.5px;}
+  .loga .note textarea{
+    width:100%; border:none; background: transparent; resize:none; outline:none;
+    font-family:'Caveat'; font-size: 22px; min-height: 90px; line-height: 28px;
+    padding: 4px 0;
+  }
+
+  /* B: tappable single card w/ reveal */
+  .logb .qn{font-family:'Caveat'; font-size: 28px; text-align:center; line-height:1.1; margin: 6px 0 4px;}
+  .logb .sub{font-family:'Kalam'; font-size: 13px; color: var(--muted); text-align:center; margin-bottom: 18px;}
+  .logb .stack{position:relative; height: 300px; margin: 4px 0 10px;}
+  .logb .stack .cardface{
+    position:absolute; inset:0; border:2.5px solid var(--ink); border-radius: 20px;
+    padding: 20px; background: var(--paper);
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .logb .stack .back1{transform: rotate(-3deg) translate(-6px, 6px); opacity: .5; z-index:1;}
+  .logb .stack .back2{transform: rotate(2deg) translate(6px, 4px); opacity: .7; z-index:2;}
+  .logb .stack .front{z-index:3; box-shadow: 4px 6px 0 rgba(0,0,0,.08);}
+  .logb .stack .d{font-family:'Caveat'; font-size: 36px; line-height:1;}
+  .logb .stack .dlabel{font-family:'Kalam'; font-size:13px; color: var(--muted)}
+  .logb .stack .bigmark{width: 100px; height: 100px; border: 2.5px solid var(--ink); align-self:center; background: var(--good); border-radius: 50%;}
+  .logb .stack .status{font-family:'Caveat'; font-size: 30px; text-align:center; color: var(--good)}
+  .logb .swipes{display:flex; justify-content:space-between; font-family:'Kalam'; font-size: 11px; color: var(--muted); text-transform:uppercase; letter-spacing:1px; padding: 0 6px;}
+  .logb .streakrow{margin-top: 14px; display:flex; align-items:center; gap: 10px;}
+  .logb .streakrow .fl{font-family:'Caveat'; font-size: 34px; color: var(--good); line-height:1;}
+  .logb .streakrow .txt{font-family:'Kalam'; font-size: 13px; color: var(--ink-2); line-height: 1.3;}
+
+  /* C: segmented question w/ bottom-sheet note */
+  .logc .qn{font-family:'Caveat'; font-size: 28px; text-align:center; margin: 2px 0 8px;}
+  .logc .date{font-family:'Kalam'; font-size: 13px; color:var(--muted); text-align:center; margin-bottom: 18px;}
+  .logc .seg{
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;
+    border: 2.5px solid var(--ink); border-radius: 16px; overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .logc .seg button{
+    font-family:'Kalam'; font-size: 15px; background: transparent; border:none;
+    padding: 20px 6px; cursor: pointer; color: var(--ink);
+    border-right: 1.5px dashed var(--ink);
+    display: flex; flex-direction: column; align-items:center; gap: 6px;
+  }
+  .logc .seg button:last-child{border-right:none;}
+  .logc .seg button.sel.good{background: var(--good); color: var(--paper)}
+  .logc .seg button.sel.bad{background: var(--bad); color: var(--paper)}
+  .logc .seg button.sel.off{background: var(--off); color: var(--ink)}
+  .logc .sub2{
+    font-family:'Kalam'; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;
+  }
+  .logc .notes-inline{
+    border: 2px solid var(--ink); border-radius: 14px; padding: 10px 12px;
+  }
+  .logc .notes-inline textarea{
+    width: 100%; border: none; background: transparent; outline: none; resize: none;
+    font-family:'Caveat'; font-size: 20px; min-height: 90px; line-height: 26px;
+  }
+  .logc .recent{
+    margin-top: 14px;
+  }
+  .logc .recent .row{
+    display:flex; justify-content:space-between; align-items:center; font-family:'Kalam'; font-size: 13px; padding: 6px 0;
+    border-bottom: 1.5px dashed var(--ink);
+  }
+  .logc .recent .row:last-child{border-bottom:none;}
+  .logc .recent .row .d{color: var(--muted);}
+
+  /* =========== WEEK screen =========== */
+  .wk .list{display:flex; flex-direction:column; gap: 10px;}
+  .wk .d{
+    display:grid; grid-template-columns: 50px 1fr 30px; gap: 10px; align-items:center;
+    border:2px solid var(--ink); border-radius: 14px; padding: 10px 12px;
+    background: var(--paper);
+  }
+  .wk .d .date .dow{font-family:'Kalam'; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;}
+  .wk .d .date .n{font-family:'Caveat'; font-size: 26px; line-height: 1;}
+  .wk .d .body .note{font-family:'Caveat'; font-size: 17px; color: var(--ink-2); line-height: 20px;}
+  .wk .d .body .empty{font-family:'Kalam'; font-style: italic; font-size: 13px; color: var(--muted);}
+  .wk .d.today{outline: 2px dashed var(--ink); outline-offset: 2px;}
+  .wk .summary{
+    display:flex; justify-content: space-between; align-items:center;
+    margin: 12px 2px 14px; font-family:'Kalam'; font-size: 13px; color: var(--ink-2);
+  }
+  .wk .summary .big{font-family:'Caveat'; font-size: 30px; color: var(--good); line-height:1;}
+  .wk .summary .pill{
+    border: 2px solid var(--ink); border-radius: 14px; padding: 8px 12px; display:flex; gap:10px; align-items:center;
+  }
+
+  /* =========== MONTH screens =========== */
+  .mo-head{display:flex; justify-content:space-between; align-items:center; margin: 2px 2px 10px;}
+  .mo-head .m{font-family:'Caveat'; font-size:24px;}
+  .mo-head .r{font-family:'Kalam'; font-size: 12px; color: var(--muted);}
+  .mo-dows{display:grid; grid-template-columns: repeat(7,1fr); gap:4px; margin-bottom: 4px;}
+  .mo-dows div{text-align:center; font-family:'Kalam'; font-size: 10px; color: var(--muted); text-transform:uppercase; letter-spacing:1px;}
+  .mo-grid{display:grid; grid-template-columns: repeat(7,1fr); gap: 4px;}
+  .mo-grid .c{
+    aspect-ratio: 1; border: 1.5px solid var(--ink); border-radius: 8px;
+    background: var(--paper); font-family:'Kalam'; font-size: 11px;
+    display:flex; flex-direction:column; justify-content:space-between; padding: 3px 4px;
+    position: relative;
+  }
+  .mo-grid .c.weekend{background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(0,0,0,.05) 4px 8px)}
+  .mo-grid .c.out{opacity: .3}
+  .mo-grid .c.today{outline: 1.5px dashed var(--ink); outline-offset: 1.5px}
+  .mo-grid .c .mk{width: 10px; height: 10px; border-width: 1.5px; align-self:flex-end;}
+
+  /* month variation B: list by week */
+  .mob .wrow{
+    border: 2px solid var(--ink); border-radius: 14px; margin-bottom: 10px; padding: 10px 12px;
+  }
+  .mob .wrow .h{
+    display:flex; justify-content: space-between; align-items:center;
+    font-family:'Kalam'; font-size: 12px; color: var(--muted);
+    text-transform:uppercase; letter-spacing:1px; margin-bottom: 6px;
+  }
+  .mob .wrow .h .stat{font-family:'Caveat'; font-size: 22px; color: var(--good); text-transform: none; letter-spacing: 0;}
+  .mob .wrow .days{display:grid; grid-template-columns: repeat(5, 1fr); gap: 6px;}
+  .mob .wrow .days .d{
+    aspect-ratio: 1; border: 1.5px solid var(--ink); border-radius: 8px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap: 3px; font-family:'Kalam'; font-size: 10px;
+  }
+  .mob .wrow .days .d .n{font-family:'Caveat'; font-size: 18px; line-height:1;}
+  .mob .wrow .days .d .mk{width: 14px; height: 14px; border-width: 2px;}
+
+  /* =========== YEAR heatmap =========== */
+  .yr .grid{
+    display:grid; grid-template-columns: 24px repeat(53, 1fr); gap: 2px;
+    font-family:'Kalam'; font-size: 8px;
+  }
+  .yr .grid .row{display: contents;}
+  .yr .mon{color: var(--muted); display:flex; align-items:center; font-size: 9px;}
+  .yr .cell{aspect-ratio:1; border: 1px solid var(--ink); border-radius: 2px;}
+  .yr .cell.good{background: var(--good)}
+  .yr .cell.bad{background: var(--bad)}
+  .yr .cell.off{background: repeating-linear-gradient(45deg, var(--off) 0 2px, transparent 2px 4px)}
+  .yr .cell.we{background: rgba(0,0,0,.05); border-style: dashed}
+  .yr .cell.empty{border-style: dashed; opacity: .5}
+  .yr .months-row{
+    display:grid; grid-template-columns: 24px repeat(12, 1fr); gap: 2px;
+    font-family:'Kalam'; font-size: 10px; color: var(--muted);
+    margin-top: 6px;
+  }
+  .yr .months-row .sp{grid-column: 1;}
+  .yr .summary{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;
+  }
+  .yr .summary .s{
+    border: 2px solid var(--ink); border-radius: 14px; padding: 10px; text-align:center;
+  }
+  .yr .summary .s .big{font-family:'Caveat'; font-size: 30px; line-height:1; color: var(--good);}
+  .yr .summary .s.bad .big{color: var(--bad);}
+  .yr .summary .s .lbl{font-family:'Kalam'; font-size: 11px; color: var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:3px;}
+
+  /* =========== STATS screen =========== */
+  .st .hero{
+    text-align:center; padding: 12px 0 6px;
+  }
+  .st .hero .big{font-family:'Caveat'; font-size: 70px; line-height:.9; color: var(--good);}
+  .st .hero .sub{font-family:'Kalam'; font-size: 13px; color: var(--muted);}
+  .st .stripe{display:flex; gap: 6px; margin: 12px 0;}
+  .st .stripe span{
+    flex:1; height: 16px; border:2px solid var(--ink); display:block;
+  }
+  .st .stripe .g{background:var(--good); border-radius:50%}
+  .st .stripe .b{background:var(--bad); transform:rotate(45deg)}
+  .st .stripe .o{background: repeating-linear-gradient(45deg, var(--off) 0 3px, transparent 3px 6px)}
+  .st .stripe .e{background: transparent; border-style: dashed}
+  .st .row{display:flex; justify-content: space-between; align-items:center; font-family:'Kalam'; font-size: 13px; padding: 5px 0; border-bottom: 1.5px dashed var(--ink);}
+  .st .row:last-child{border-bottom:none}
+  .st .row .v{font-family:'Caveat'; font-size: 20px;}
+  .st .trend svg{width: 100%; height: 120px;}
+  .st .trend .area{fill: var(--good); opacity:.15}
+  .st .trend .line{fill:none; stroke: var(--good); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;}
+  .st .trend .axis{stroke: var(--ink); stroke-width: 1; fill:none}
+  .st .trend .gdot{fill: var(--good); stroke: var(--ink); stroke-width: 1.2}
+  .st .bars{display:flex; flex-direction:column; gap: 6px;}
+  .st .brow{display:grid; grid-template-columns: 30px 1fr 26px; gap:8px; align-items:center; font-family:'Kalam'; font-size: 12px;}
+  .st .brow .bar{height: 12px; border: 1.5px solid var(--ink); border-radius: 4px; overflow: hidden;}
+  .st .brow .bar i{display:block; height:100%; background: var(--good);}
+  .st .brow .bar.bad i{background: var(--bad);}
+
+  /* =========== REMINDER screen =========== */
+  .rm .bigq{
+    font-family:'Caveat'; font-size: 34px; text-align:center; line-height: 1.15;
+    margin: 30px 10px 10px;
+  }
+  .rm .n{
+    font-family:'Caveat'; font-size: 92px; color: var(--bad); text-align:center; line-height: 1;
+    margin: 8px 0;
+  }
+  .rm .nlabel{
+    font-family:'Kalam'; font-size: 14px; color: var(--muted); text-align:center; margin-bottom: 20px;
+  }
+  .rm .miss-list{
+    border-top: 1.5px dashed var(--ink); padding-top: 14px; margin: 0 2px;
+  }
+  .rm .miss-list .row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'Kalam'; font-size: 14px; padding: 8px 0;
+    border-bottom: 1.5px dashed var(--ink);
+  }
+  .rm .miss-list .row:last-child{border-bottom:none}
+  .rm .miss-list .row .d{color: var(--muted);}
+  .rm .miss-list .row .mk{width: 22px; height: 22px;}
+  .rm .cta{
+    border: 2.5px solid var(--ink); border-radius: 18px;
+    background: var(--ink); color: var(--paper);
+    font-family:'Kalam'; font-size: 16px;
+    padding: 14px; text-align:center; cursor: pointer;
+    margin-top: 14px;
+  }
+  .rm .link{
+    text-align:center; font-family:'Kalam'; font-size: 13px; color: var(--muted);
+    margin-top: 10px; text-decoration: underline dashed;
+  }
+
+  /* Section header between groups of screens */
+  .group-head{
+    grid-column: 1 / -1;
+    display:flex; align-items:center; gap:12px;
+    font-family:'Caveat'; font-size: 26px; color: var(--ink-2);
+    margin-top: 10px;
+  }
+  .group-head::before, .group-head::after{
+    content:""; flex: 1; border-top: 2px dashed var(--ink); opacity:.3;
+  }
+
+  /* Tweaks panel reuse */
+  .tweaks{
+    position: fixed; right: 18px; bottom: 18px; z-index: 50;
+    width: 240px; background: var(--paper);
+    border: 2.5px solid var(--ink);
+    border-radius: 18px;
+    padding: 14px 16px;
+    box-shadow: 8px 10px 0 rgba(0,0,0,.12);
+    display: none; font-family:'Kalam';
+  }
+  .tweaks.open{display:block}
+  .tweaks h4{margin:0 0 10px; font-family:'Caveat'; font-size:22px; font-weight:700; display:flex; justify-content:space-between; align-items:center;}
+  .tweak-row{display:flex; justify-content:space-between; align-items:center; margin: 8px 0; font-size: 13px;}
+  .tweak-row .opts{display:flex; gap:4px;}
+  .tweak-row .opts button{font-family:'Kalam'; font-size:12px; padding:3px 8px; border:1.5px solid var(--ink); background:transparent; cursor:pointer; border-radius:8px;}
+  .tweak-row .opts button.on{background:var(--ink); color: var(--paper);}
+  .tweaks-toggle{
+    position:fixed; right:18px; bottom:18px; z-index:49;
+    border: 2.5px solid var(--ink); background: var(--paper);
+    font-family:'Caveat'; font-size: 18px;
+    padding: 10px 16px; border-radius: 20px; cursor:pointer;
+    box-shadow: 6px 8px 0 rgba(0,0,0,.1);
+  }
+  .btn-ghost{font-family:'Kalam'; font-size:13px; background:none; border:none; color:var(--muted); cursor:pointer; text-decoration:underline dashed;}
+
+  /* density tweak */
+  body.tight .screen{border-radius: 18px;}
+  body.tight .card, body.tight .wk .d, body.tight .mob .wrow, body.tight .yr .summary .s, body.tight .logc .notes-inline, body.tight .logc .seg, body.tight .mo-grid .c, body.tight .tabbar{border-radius: 8px !important;}
+  body.noaccent{--good:#2a2621; --bad:#6f6a60;}
+  body.hide-notes .loga .note,
+  body.hide-notes .logc .notes-inline,
+  body.hide-notes .wk .d .body .note{display:none}
+  body.hide-notes .wk .d{grid-template-columns: 50px 1fr 30px;}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- top bar -->
+  <div class="topbar">
+    <div>
+      <div class="brand">Work Mood Tracker · Mobile
+        <small>wireframe set · naked screens · bottom-tab nav</small>
+      </div>
+    </div>
+    <div class="legend">
+      <span><span class="dot good"></span>good</span>
+      <span><span class="dot bad"></span>bad</span>
+      <span><span class="dot off"></span>off</span>
+      <span><span class="dot empty"></span>not logged</span>
+    </div>
+  </div>
+
+  <div class="canvas">
+
+    <!-- =============== GROUP: LOG TODAY =============== -->
+    <div class="group-head">Log today · 3 interaction variations</div>
+
+    <!-- LOG A -->
+    <div class="screen-wrap">
+      <div class="screen loose loga">
+        <div class="statusbar"><span>9:41</span><span><span class="bars"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="sh">
+          <div><div class="title">Today</div><div class="sub" style="font-family:'Kalam'; font-size:12px;">Wed, Apr 15</div></div>
+          <div style="font-family:'Caveat'; font-size:22px; color:var(--good);">🔥 3</div>
+        </div>
+        <div class="sc">
+          <div class="qn">How did work go today?</div>
+          <div class="sub">pick one · you can change it later</div>
+          <div class="choices">
+            <button class="sel good"><span class="mk good"></span> Good day</button>
+            <button><span class="mk bad"></span> Bad day</button>
+            <button><span class="mk off"></span> Off (vac / sick / holiday)</button>
+          </div>
+          <div class="note">
+            <label>a short note (optional)</label>
+            <textarea>Shipped the redesign review. Maya's feedback really helped.</textarea>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tb on"><span class="ic">✎</span>Log</div>
+          <div class="tb"><span class="ic">▦</span>Calendar</div>
+          <div class="tb"><span class="ic">∿</span>Stats</div>
+        </div>
+      </div>
+      <div class="label">A · Stacked buttons<small>simple · one thumb · note stays visible</small></div>
+    </div>
+
+    <!-- LOG B -->
+    <div class="screen-wrap">
+      <div class="screen loose2 logb">
+        <div class="statusbar"><span>9:41</span><span><span class="bars"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="sh">
+          <div><div class="title">Today</div><div class="sub" style="font-family:'Kalam'; font-size:12px;">Wed, Apr 15</div></div>
+          <div style="font-family:'Caveat'; font-size:22px; color:var(--good);">🔥 3</div>
+        </div>
+        <div class="sc">
+          <div class="qn">How did work go?</div>
+          <div class="sub">swipe the card · right · left · up</div>
+
+          <div class="stack">
+            <div class="cardface back1"></div>
+            <div class="cardface back2"></div>
+            <div class="cardface front">
+              <div>
+                <div class="d">Wed 15</div>
+                <div class="dlabel">April · week 16</div>
+              </div>
+              <div class="bigmark"></div>
+              <div class="status">→ marking good</div>
+            </div>
+          </div>
+          <div class="swipes">
+            <span>← bad</span>
+            <span>↑ off</span>
+            <span>good →</span>
+          </div>
+
+          <div class="streakrow">
+            <div class="fl">🔥 3</div>
+            <div class="txt">Streak going. Your best run this quarter was 6.</div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tb on"><span class="ic">✎</span>Log</div>
+          <div class="tb"><span class="ic">▦</span>Calendar</div>
+          <div class="tb"><span class="ic">∿</span>Stats</div>
+        </div>
+      </div>
+      <div class="label">B · Swipe-the-card<small>tactile · one gesture · great for daily habit</small></div>
+    </div>
+
+    <!-- LOG C -->
+    <div class="screen-wrap">
+      <div class="screen loose logc">
+        <div class="statusbar"><span>9:41</span><span><span class="bars"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="sh">
+          <div><div class="title">Today</div><div class="sub" style="font-family:'Kalam'; font-size:12px;">Wed, Apr 15</div></div>
+          <div style="font-family:'Caveat'; font-size:22px; color:var(--good);">🔥 3</div>
+        </div>
+        <div class="sc">
+          <div class="qn">How did work go today?</div>
+          <div class="date">Wed, Apr 15 · week 16</div>
+
+          <div class="seg">
+            <button class="sel good"><span class="mk good"></span><span>good</span></button>
+            <button><span class="mk bad"></span><span>bad</span></button>
+            <button><span class="mk off"></span><span>off</span></button>
+          </div>
+
+          <div class="sub2">note (optional)</div>
+          <div class="notes-inline">
+            <textarea>Design review went well. Pair session with Sam after lunch.</textarea>
+          </div>
+
+          <div class="recent">
+            <div class="sub2" style="margin-top:14px;">this week so far</div>
+            <div class="row"><span><span class="mk good"></span> &nbsp; Mon 13</span><span class="d">"focus all morning"</span></div>
+            <div class="row"><span><span class="mk bad"></span> &nbsp; Tue 14</span><span class="d">"too many meetings"</span></div>
+            <div class="row"><span><span class="mk good"></span> &nbsp; Wed 15</span><span class="d">today</span></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tb on"><span class="ic">✎</span>Log</div>
+          <div class="tb"><span class="ic">▦</span>Calendar</div>
+          <div class="tb"><span class="ic">∿</span>Stats</div>
+        </div>
+      </div>
+      <div class="label">C · Segmented + recap<small>see this week's log inline</small></div>
+    </div>
+
+    <!-- =============== GROUP: CALENDAR VIEWS =============== -->
+    <div class="group-head">Calendar · weekly, monthly (×2), yearly</div>
+
+    <!-- WEEK -->
+    <div class="screen-wrap">
+      <div class="screen loose wk">
+        <div class="statusbar"><span>9:41</span><span><span class="bars"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="sh">
+          <div><div class="title">Week 16</div><div class="sub" style="font-family:'Kalam'; font-size:12px;">Apr 13 – 17, 2026</div></div>
+          <div style="display:flex; gap:8px;"><span style="font-family:'Caveat'; font-size:22px;">‹</span><span style="font-family:'Caveat'; font-size:22px;">›</span></div>
+        </div>
+        <div class="sc">
+          <div class="summary">
+            <div>
+              <span class="big">4</span>
+              <span style="color:var(--muted); font-family:'Kalam'; font-size:13px;"> / 5 good</span>
+            </div>
+            <div class="pill"><span style="font-family:'Caveat'; font-size:20px; color:var(--good);">🔥 3</span><span style="color:var(--muted); font-size:12px;">streak</span></div>
+          </div>
+          <div class="list">
+            <div class="d">
+              <div class="date"><div class="dow">mon</div><div class="n">13</div></div>
+              <div class="body"><div class="note">Focus all morning. Shipped settings bug.</div></div>
+              <div><span class="mk good"></span></div>
+            </div>
+            <div class="d">
+              <div class="date"><div class="dow">tue</div><div class="n">14</div></div>
+              <div class="body"><div class="note">Too many meetings. Lost the thread.</div></div>
+              <div><span class="mk bad"></span></div>
+            </div>
+            <div class="d today">
+              <div class="date"><div class="dow">wed</div><div class="n">15</div></div>
+              <div class="body"><div class="note">Design review went well.</div></div>
+              <div><span class="mk good"></span></div>
+            </div>
+            <div class="d">
+              <div class="date"><div class="dow">thu</div><div class="n">16</div></div>
+              <div class="body"><div class="note">Paired with Sam on auth.</div></div>
+              <div><span class="mk good"></span></div>
+            </div>
+            <div class="d">
+              <div class="date"><div class="dow">fri</div><div class="n">17</div></div>
+              <div class="body"><div class="note">PTO — long weekend.</div></div>
+              <div><span class="mk off"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tb"><span class="ic">✎</span>Log</div>
+          <div class="tb on"><span class="ic">▦</span>Calendar</div>
+          <div class="tb"><span class="ic">∿</span>Stats</div>
+        </div>
+      </div>
+      <div class="label">Weekly<small>list · one row per workday</small></div>
+    </div>
+
+    <!-- MONTH A grid -->
+    <div class="screen-wrap">
+      <div class="screen loose2 mo">
+        <div class="statusbar"><span>9:41</span><span><span class="bars"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="sh">
+          <div><div class="title">April 2026</div><div class="sub" style="font-family:'Kalam'; font-size:12px;">68% good so far</div></div>
+          <div style="display:flex; gap:8px;"><span style="font-family:'Caveat'; font-size:22px;">‹</span><span style="font-family:'Caveat'; font-size:22px;">›</span></div>
+        </div>
+        <div class="sc">
+          <div class="mo-dows">
+            <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+          </div>
+          <div class="mo-grid" id="moA"></div>
+
+          <div class="card" style="margin-top:14px;">
+            <h4>this month</h4>
+            <div style="display:flex; justify-content:space-between; font-family:'Kalam'; font-size:13px;">
+              <span><span class="mk good"></span> 11 good</span>
+              <span><span class="mk bad"></span> 5 bad</span>
+              <span><span class="mk off"></span> 2 off</span>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tb"><span class="ic">✎</span>Log</div>
+          <div class="tb on"><span class="ic">▦</span>Calendar</div>
+          <div class="tb"><span class="ic">∿</span>Stats</div>
+        </div>
+      </div>
+      <div class="label">Monthly A · grid<small>familiar calendar · tap a cell</small></div>
+    </div>
+
+    <!-- MONTH B list-by-week -->
+    <div class="screen-wrap">
+      <div class="screen loose mob">
+        <div class="statusbar"><span>9:41</span><span><span class="bars"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="sh">
+          <div><div class="title">April 2026</div><div class="sub" style="font-family:'Kalam'; font-size:12px;">week-by-week · 68% good</div></div>
+          <div style="display:flex; gap:8px;"><span style="font-family:'Caveat'; font-size:22px;">‹</span><span style="font-family:'Caveat'; font-size:22px;">›</span></div>
+        </div>
+        <div class="sc">
+
+          <div class="wrow">
+            <div class="h"><span>week 14 · Mar 30 – Apr 3</span><span class="stat">67%</span></div>
+            <div class="days">
+              <div class="d out"><div class="n">30</div><span class="mk empty"></span></div>
+              <div class="d out"><div class="n">31</div><span class="mk empty"></span></div>
+              <div class="d"><div class="n">1</div><span class="mk good"></span></div>
+              <div class="d"><div class="n">2</div><span class="mk bad"></span></div>
+              <div class="d"><div class="n">3</div><span class="mk good"></span></div>
+            </div>
+          </div>
+
+          <div class="wrow">
+            <div class="h"><span>week 15 · Apr 6 – 10</span><span class="stat">80%</span></div>
+            <div class="days">
+              <div class="d"><div class="n">6</div><span class="mk good"></span></div>
+              <div class="d"><div class="n">7</div><span class="mk good"></span></div>
+              <div class="d"><div class="n">8</div><span class="mk bad"></span></div>
+              <div class="d"><div class="n">9</div><span class="mk good"></span></div>
+              <div class="d"><div class="n">10</div><span class="mk good"></span></div>
+            </div>
+          </div>
+
+          <div class="wrow" style="outline:2px dashed var(--ink); outline-offset:2px;">
+            <div class="h"><span>week 16 · this week</span><span class="stat">80%</span></div>
+            <div class="days">
+              <div class="d"><div class="n">13</div><span class="mk good"></span></div>
+              <div class="d"><div class="n">14</div><span class="mk bad"></span></div>
+              <div class="d"><div class="n">15</div><span class="mk good"></span></div>
+              <div class="d"><div class="n">16</div><span class="mk good"></span></div>
+              <div class="d"><div class="n">17</div><span class="mk off"></span></div>
+            </div>
+          </div>
+
+          <div class="wrow">
+            <div class="h"><span>week 17 · Apr 20 – 24</span><span class="stat">—</span></div>
+            <div class="days">
+              <div class="d"><div class="n">20</div><span class="mk empty"></span></div>
+              <div class="d"><div class="n">21</div><span class="mk empty"></span></div>
+              <div class="d"><div class="n">22</div><span class="mk empty"></span></div>
+              <div class="d"><div class="n">23</div><span class="mk empty"></span></div>
+              <div class="d"><div class="n">24</div><span class="mk empty"></span></div>
+            </div>
+          </div>
+
+        </div>
+        <div class="tabbar">
+          <div class="tb"><span class="ic">✎</span>Log</div>
+          <div class="tb on"><span class="ic">▦</span>Calendar</div>
+          <div class="tb"><span class="ic">∿</span>Stats</div>
+        </div>
+      </div>
+      <div class="label">Monthly B · list-by-week<small>no weekends · % per week</small></div>
+    </div>
+
+    <!-- YEAR -->
+    <div class="screen-wrap">
+      <div class="screen loose2 yr">
+        <div class="statusbar"><span>9:41</span><span><span class="bars"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="sh">
+          <div><div class="title">2026</div><div class="sub" style="font-family:'Kalam'; font-size:12px;">year at a glance</div></div>
+          <div style="display:flex; gap:8px;"><span style="font-family:'Caveat'; font-size:22px;">‹</span><span style="font-family:'Caveat'; font-size:22px;">›</span></div>
+        </div>
+        <div class="sc">
+          <div class="grid" id="yrGrid"></div>
+          <div class="months-row" id="yrMonths">
+            <div class="sp"></div>
+          </div>
+
+          <div class="summary">
+            <div class="s"><div class="big">64%</div><div class="lbl">good YTD</div></div>
+            <div class="s bad"><div class="big">9</div><div class="lbl">longest streak</div></div>
+          </div>
+
+          <div class="card" style="margin-top:10px;">
+            <h4>month comparison</h4>
+            <div style="display:flex; justify-content:space-between; font-family:'Kalam'; font-size:13px;">
+              <span>Jan 58%</span><span>Feb 72%</span><span>Mar 60%</span><span style="color:var(--good); font-weight:700;">Apr 68%</span>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tb"><span class="ic">✎</span>Log</div>
+          <div class="tb on"><span class="ic">▦</span>Calendar</div>
+          <div class="tb"><span class="ic">∿</span>Stats</div>
+        </div>
+      </div>
+      <div class="label">Yearly heatmap<small>53 weeks × 5 weekdays · tap to jump</small></div>
+    </div>
+
+    <!-- =============== GROUP: STATS + REMINDER =============== -->
+    <div class="group-head">Insights</div>
+
+    <!-- STATS -->
+    <div class="screen-wrap">
+      <div class="screen loose st">
+        <div class="statusbar"><span>9:41</span><span><span class="bars"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="sh">
+          <div><div class="title">Stats</div><div class="sub" style="font-family:'Kalam'; font-size:12px;">Apr 2026</div></div>
+          <div style="font-family:'Kalam'; font-size:12px; color:var(--muted);">last 30 days ▾</div>
+        </div>
+        <div class="sc">
+          <div class="hero">
+            <div class="big">68%</div>
+            <div class="sub">good days · up 12% from March</div>
+          </div>
+
+          <div class="card">
+            <h4>this month so far</h4>
+            <div class="stripe">
+              <span class="g"></span><span class="g"></span><span class="b"></span><span class="g"></span><span class="g"></span>
+              <span class="o"></span><span class="g"></span><span class="g"></span><span class="g"></span><span class="b"></span>
+              <span class="g"></span><span class="g"></span><span class="g"></span><span class="b"></span><span class="b"></span>
+              <span class="o"></span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h4>streaks</h4>
+            <div class="row"><span>current</span><span class="v" style="color:var(--good);">🔥 3</span></div>
+            <div class="row"><span>longest (this year)</span><span class="v">9</span></div>
+            <div class="row"><span>worst bad run</span><span class="v" style="color:var(--bad);">2</span></div>
+          </div>
+
+          <div class="card trend">
+            <h4>last 8 weeks · % good</h4>
+            <svg viewBox="0 0 320 120" preserveAspectRatio="none" id="stTrend"></svg>
+          </div>
+
+          <div class="card">
+            <h4>by day of week</h4>
+            <div class="bars">
+              <div class="brow"><span>MON</span><span class="bar"><i style="width:70%"></i></span><span>70%</span></div>
+              <div class="brow"><span>TUE</span><span class="bar bad"><i style="width:45%"></i></span><span>45%</span></div>
+              <div class="brow"><span>WED</span><span class="bar"><i style="width:82%"></i></span><span>82%</span></div>
+              <div class="brow"><span>THU</span><span class="bar"><i style="width:75%"></i></span><span>75%</span></div>
+              <div class="brow"><span>FRI</span><span class="bar"><i style="width:68%"></i></span><span>68%</span></div>
+            </div>
+            <div class="dash"></div>
+            <div style="font-family:'Caveat'; font-size: 18px; color: var(--ink-2);">
+              Tuesdays are your hard day. Wednesdays are your favorite.
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tb"><span class="ic">✎</span>Log</div>
+          <div class="tb"><span class="ic">▦</span>Calendar</div>
+          <div class="tb on"><span class="ic">∿</span>Stats</div>
+        </div>
+      </div>
+      <div class="label">Stats / insights<small>% good · streaks · trend · DoW</small></div>
+    </div>
+
+    <!-- REMINDER -->
+    <div class="screen-wrap">
+      <div class="screen loose2 rm">
+        <div class="statusbar"><span>9:41</span><span><span class="bars"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="sh">
+          <div><div class="title">Welcome back</div><div class="sub" style="font-family:'Kalam'; font-size:12px;">Wed, Apr 15</div></div>
+          <div style="font-family:'Kalam'; font-size:12px; color:var(--muted);">✕</div>
+        </div>
+        <div class="sc">
+          <div class="bigq">it's been a minute since you logged</div>
+          <div class="n">3</div>
+          <div class="nlabel">workdays missed</div>
+
+          <div class="miss-list">
+            <div class="row"><span>Fri, Apr 10</span><span class="d">"—"</span><span class="mk empty"></span></div>
+            <div class="row"><span>Mon, Apr 13</span><span class="d">"—"</span><span class="mk empty"></span></div>
+            <div class="row"><span>Tue, Apr 14</span><span class="d">"—"</span><span class="mk empty"></span></div>
+          </div>
+
+          <div style="font-family:'Caveat'; font-size: 20px; color: var(--ink-2); text-align:center; margin-top: 16px; line-height: 1.3;">
+            no pressure — fill them in quickly,<br/>or just log today.
+          </div>
+
+          <div class="cta">catch up · 3 days</div>
+          <div class="link">just log today →</div>
+        </div>
+        <div class="tabbar">
+          <div class="tb on"><span class="ic">✎</span>Log</div>
+          <div class="tb"><span class="ic">▦</span>Calendar</div>
+          <div class="tb"><span class="ic">∿</span>Stats</div>
+        </div>
+      </div>
+      <div class="label">"Haven't logged in N days"<small>gentle catch-up card</small></div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center; font-family:'Caveat'; font-size: 20px; color: var(--muted); margin-top: 40px;">
+    — sketch · not final · all data is placeholder —
+  </div>
+</div>
+
+<!-- Tweaks -->
+<button class="tweaks-toggle" id="tweaksBtn">✎ tweaks</button>
+<div class="tweaks" id="tweaksPanel">
+  <h4>Tweaks <button class="btn-ghost" id="tweaksClose">close</button></h4>
+  <div class="tweak-row"><span>sketch</span>
+    <div class="opts" data-key="sketch">
+      <button data-v="loose" class="on">loose</button>
+      <button data-v="tight">tight</button>
+    </div>
+  </div>
+  <div class="tweak-row"><span>accent</span>
+    <div class="opts" data-key="accent">
+      <button data-v="on" class="on">on</button>
+      <button data-v="off">off</button>
+    </div>
+  </div>
+  <div class="tweak-row"><span>journal notes</span>
+    <div class="opts" data-key="notes">
+      <button data-v="show" class="on">show</button>
+      <button data-v="hide">hide</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---- Month grid A (April 2026) ---- */
+(function renderMonthA(){
+  const el = document.getElementById('moA');
+  const aprilData = {1:'g',2:'b',3:'g',6:'g',7:'g',8:'b',9:'g',10:'g',13:'g',14:'b',15:'g',16:'g',17:'v'};
+  const leading = 2; // Apr 1 = Wed, week starts Mon
+  for(let i=0;i<leading;i++){
+    const d = document.createElement('div');
+    d.className='c out';
+    d.innerHTML=`<span>${30+i-1}</span>`;
+    el.appendChild(d);
+  }
+  for(let n=1;n<=30;n++){
+    const dowIdx = (2 + (n-1)) % 7;
+    const isWeekend = dowIdx>=5;
+    const code = aprilData[n];
+    const m = code==='g'?'good':code==='b'?'bad':(code==='v'||code==='s'||code==='h')?'off':'';
+    const d = document.createElement('div');
+    d.className = 'c' + (isWeekend?' weekend':'') + (n===15?' today':'');
+    d.innerHTML = `<span>${n}</span>` + (isWeekend||!m ? '' : `<span class="mk ${m}"></span>`);
+    el.appendChild(d);
+  }
+  const total = leading + 30;
+  const trailing = (7 - (total%7)) % 7;
+  for(let i=0;i<trailing;i++){
+    const d = document.createElement('div'); d.className='c out'; d.innerHTML=`<span>${i+1}</span>`; el.appendChild(d);
+  }
+})();
+
+/* ---- Year heatmap ---- */
+(function renderYear(){
+  const el = document.getElementById('yrGrid');
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  for(let row=0; row<7; row++){
+    const lbl = document.createElement('div');
+    lbl.className='mon'; lbl.textContent = days[row][0];
+    el.appendChild(lbl);
+    for (let col=0; col<53; col++){
+      const c = document.createElement('div');
+      c.className='cell';
+      const isWeekend = row>=5;
+      const k = (row*53+col);
+      if (isWeekend) c.classList.add('we');
+      else if (col >= 16) c.classList.add('empty');
+      else {
+        const r = ((k*37) % 100);
+        if (r<10) c.classList.add('off');
+        else if (r<35) c.classList.add('bad');
+        else c.classList.add('good');
+      }
+      el.appendChild(c);
+    }
+  }
+  const months = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const mr = document.getElementById('yrMonths');
+  months.forEach(m=>{
+    const d = document.createElement('div'); d.textContent=m; mr.appendChild(d);
+  });
+})();
+
+/* ---- Stats trend svg ---- */
+(function renderTrend(){
+  const svg = document.getElementById('stTrend');
+  const w=320,h=120,pad=14;
+  const pts = [45,52,60,48,65,70,62,68];
+  const n = pts.length;
+  const x = i => pad + i*((w-2*pad)/(n-1));
+  const y = v => h - pad - (v/100)*(h-2*pad);
+  let d=''; pts.forEach((v,i)=>d += (i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ');
+  const area = d + ` L ${x(n-1)} ${h-pad} L ${x(0)} ${h-pad} Z`;
+  let dots=''; pts.forEach((v,i)=>dots+=`<circle class="gdot" cx="${x(i)}" cy="${y(v)}" r="3"/>`);
+  const axis = `<path class="axis" d="M ${pad} ${pad} L ${pad} ${h-pad} L ${w-pad} ${h-pad}"/>`;
+  svg.innerHTML = `<path class="area" d="${area}"/><path class="line" d="${d}"/>${dots}${axis}`;
+})();
+
+/* ---- Tweaks ---- */
+const tweaksBtn = document.getElementById('tweaksBtn');
+const tweaksPanel = document.getElementById('tweaksPanel');
+tweaksBtn.addEventListener('click', ()=> tweaksPanel.classList.add('open'));
+document.getElementById('tweaksClose').addEventListener('click', ()=> tweaksPanel.classList.remove('open'));
+
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "sketch": "loose",
+  "accent": "on",
+  "notes": "show"
+}/*EDITMODE-END*/;
+
+function applyTweaks(t){
+  document.body.classList.toggle('tight', t.sketch==='tight');
+  document.body.classList.toggle('noaccent', t.accent==='off');
+  document.body.classList.toggle('hide-notes', t.notes==='hide');
+  document.querySelectorAll('.tweak-row').forEach(row=>{
+    const key = row.querySelector('.opts').dataset.key;
+    row.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.v===t[key]));
+  });
+}
+applyTweaks(TWEAKS);
+
+document.querySelectorAll('.tweak-row .opts').forEach(g=>{
+  g.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if (!b) return;
+    const key = g.dataset.key; TWEAKS[key] = b.dataset.v;
+    applyTweaks(TWEAKS);
+    try{ window.parent.postMessage({type:'__edit_mode_set_keys', edits:{[key]: b.dataset.v}}, '*'); }catch(e){}
+  });
+});
+
+window.addEventListener('message', e=>{
+  const d = e.data||{};
+  if (d.type==='__activate_edit_mode') tweaksPanel.classList.add('open');
+  if (d.type==='__deactivate_edit_mode') tweaksPanel.classList.remove('open');
+});
+try{ window.parent.postMessage({type:'__edit_mode_available'}, '*'); }catch(e){}
+</script>
+</body>
+</html>
