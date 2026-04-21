@@ -1,19 +1,27 @@
 const SmileIcon = () => (
   <svg viewBox="0 0 24 24" width="28" height="28" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 3v4M5 8l3 2.5M19 8l-3 2.5M4 15a8 8 0 0 0 16 0"/>
+    <circle cx="12" cy="12" r="9"/>
+    <line x1="9" y1="10" x2="9" y2="10" strokeWidth="2.5"/>
+    <line x1="15" y1="10" x2="15" y2="10" strokeWidth="2.5"/>
+    <path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/>
   </svg>
 )
 
 const FrownIcon = () => (
   <svg viewBox="0 0 24 24" width="28" height="28" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 3v4M5 8l3 2.5M19 8l-3 2.5M4 18a8 8 0 0 1 16 0"/>
+    <circle cx="12" cy="12" r="9"/>
+    <line x1="9" y1="10" x2="9" y2="10" strokeWidth="2.5"/>
+    <line x1="15" y1="10" x2="15" y2="10" strokeWidth="2.5"/>
+    <path d="M8.5 16.5a4.5 4.5 0 0 1 7 0"/>
   </svg>
 )
 
 const DashIcon = () => (
   <svg viewBox="0 0 24 24" width="28" height="28" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="7"/>
-    <path d="M8 12h8"/>
+    <circle cx="12" cy="12" r="9"/>
+    <line x1="9" y1="10" x2="9" y2="10" strokeWidth="2.5"/>
+    <line x1="15" y1="10" x2="15" y2="10" strokeWidth="2.5"/>
+    <line x1="8.5" y1="15.5" x2="15.5" y2="15.5"/>
   </svg>
 )
 
